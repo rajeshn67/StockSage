@@ -78,7 +78,7 @@ const Layout = () => {
             </nav>
           </div>
 
-          <div className="flex-shrink-0 flex border-t border-gray-200 p-4">
+          <div className="flex-shrink-0 flex flex-col border-t border-gray-200 p-4 gap-3">
             <div className="flex items-center">
               <button className="flex-shrink-0 focus:outline-none" onClick={() => navigate('/profile')} title="Profile">
                 <User className="h-8 w-8 text-gray-400" />
@@ -88,6 +88,12 @@ const Layout = () => {
                 <p className="text-xs text-gray-500">{user?.shopName}</p>
               </div>
             </div>
+            <button
+              onClick={handleLogout}
+              className="mt-3 w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2 rounded shadow focus:outline-none focus:ring-2 focus:ring-red-400"
+            >
+              <LogOut className="inline-block mr-2 h-5 w-5 align-middle" /> Logout
+            </button>
           </div>
         </div>
       </div>
