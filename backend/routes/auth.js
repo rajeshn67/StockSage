@@ -136,18 +136,34 @@ router.get("/me", auth, async (req, res) => {
 // Update user profile
 router.put("/profile", auth, async (req, res) => {
   try {
-    const { name, shopName, phone, address } = req.body
+    const { name, shopName, phone, address, password, oldPassword } = req.body;
+    const updateData = {};
+    if (name) updateData.name = name.trim();
+    if (shopName) updateData.shopName = shopName.trim();
+    if (phone) updateData.phone = phone.trim();
+    if (address) updateData.address = address.trim();
 
-    const updateData = {}
-    if (name) updateData.name = name.trim()
-    if (shopName) updateData.shopName = shopName.trim()
-    if (phone) updateData.phone = phone.trim()
-    if (address) updateData.address = address.trim()
+    let user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ message: "User not found" });
 
-    const user = await User.findByIdAndUpdate(req.user._id, updateData, { new: true, runValidators: true })
+    // If password change requested
+    if (password) {
+      if (!oldPassword) {
+        return res.status(400).json({ message: "Old password is required to change password" });
+      }
+      const isMatch = await user.comparePassword(oldPassword);
+      if (!isMatch) {
+        return res.status(400).json({ message: "Old password is incorrect" });
+      }
+      user.password = password;
+    }
+
+    // Update other fields
+    Object.assign(user, updateData);
+    await user.save();
 
     res.json({
-      message: "Profile updated successfully",
+      message: password ? "Password and profile updated successfully" : "Profile updated successfully",
       user: {
         id: user._id,
         name: user.name,
@@ -156,7 +172,7 @@ router.put("/profile", auth, async (req, res) => {
         phone: user.phone,
         address: user.address,
       },
-    })
+    });
   } catch (error) {
     console.error("Update profile error:", error)
 

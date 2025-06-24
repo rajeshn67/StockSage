@@ -12,6 +12,7 @@ import Products from "./pages/Products"
 import Bills from "./pages/Bills"
 import Analytics from "./pages/Analytics"
 import CreateBill from "./pages/CreateBill"
+import Profile from "./pages/Profile"
 import LoadingSpinner from "./components/LoadingSpinner"
 import ErrorBoundary from "./components/ErrorBoundary"
 import TestStyles from "./components/TestStyles"
@@ -46,6 +47,7 @@ function App() {
           <Route path="bills" element={<Bills />} />
           <Route path="bills/create" element={<CreateBill />} />
           <Route path="analytics" element={<Analytics />} />
+          <Route path="profile" element={<Profile />} />
         </Route>
 
         <Route path="*" element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} />} />
