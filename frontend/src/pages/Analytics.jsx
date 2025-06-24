@@ -93,16 +93,12 @@ const Analytics = () => {
     {
       name: "Total Revenue",
       value: formatCurrency(dashboardData.monthlySales.total),
-      change: "+12.5%",
-      changeType: "increase",
       icon: DollarSign,
       color: "bg-green-500",
     },
     {
       name: "Total Orders",
       value: formatNumber(dashboardData.monthlySales.count),
-      change: "+8.2%",
-      changeType: "increase",
       icon: Package,
       color: "bg-blue-500",
     },
@@ -111,16 +107,12 @@ const Analytics = () => {
       value: formatCurrency(
         dashboardData.monthlySales.count > 0 ? dashboardData.monthlySales.total / dashboardData.monthlySales.count : 0,
       ),
-      change: "+3.1%",
-      changeType: "increase",
       icon: TrendingUp,
       color: "bg-purple-500",
     },
     {
       name: "Products Sold",
       value: formatNumber(dashboardData.topProducts.reduce((sum, product) => sum + product.totalSold, 0)),
-      change: "-2.4%",
-      changeType: "decrease",
       icon: Users,
       color: "bg-orange-500",
     },
@@ -204,20 +196,7 @@ const Analytics = () => {
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">{stat.name}</p>
                 <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-                <div className="flex items-center mt-1">
-                  {stat.changeType === "increase" ? (
-                    <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
-                  ) : (
-                    <TrendingDown className="h-4 w-4 text-red-500 mr-1" />
-                  )}
-                  <span
-                    className={`text-sm font-medium ${
-                      stat.changeType === "increase" ? "text-green-600" : "text-red-600"
-                    }`}
-                  >
-                    {stat.change}
-                  </span>
-                </div>
+                
               </div>
             </div>
           </div>
