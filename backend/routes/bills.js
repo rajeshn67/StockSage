@@ -98,39 +98,46 @@ router.post("/", auth, async (req, res) => {
 // Get all bills
 router.get("/", auth, async (req, res) => {
   try {
-    const { page = 1, limit = 10, status = "", startDate = "", endDate = "" } = req.query
+    const { page = 1, limit = 10, status = "", startDate = "", endDate = "", search = "" } = req.query;
 
-    const query = { userId: req.user._id }
+    const query = { userId: req.user._id };
 
     if (status) {
-      query.status = status
+      query.status = status;
     }
 
     if (startDate && endDate) {
       query.createdAt = {
         $gte: new Date(startDate),
         $lte: new Date(endDate),
-      }
+      };
+    }
+
+    if (search) {
+      query.$or = [
+        { customerName: { $regex: search, $options: "i" } },
+        { billNumber: { $regex: search, $options: "i" } }
+      ];
     }
 
     const bills = await Bill.find(query)
-      .limit(limit * 1)
-      .skip((page - 1) * limit)
-      .sort({ createdAt: -1 })
+      .limit(Number(limit))
+      .skip((Number(page) - 1) * Number(limit))
+      .sort({ createdAt: -1 });
 
-    const total = await Bill.countDocuments(query)
+    const total = await Bill.countDocuments(query);
 
     res.json({
       bills,
       totalPages: Math.ceil(total / limit),
-      currentPage: page,
+      currentPage: Number(page),
       total,
-    })
+    });
   } catch (error) {
-    console.error("Get bills error:", error)
-    res.status(500).json({ message: "Server error" })
+    console.error("Get bills error:", error);
+    res.status(500).json({ message: "Server error" });
   }
-})
+});
 
 // Get single bill
 router.get("/:id", auth, async (req, res) => {

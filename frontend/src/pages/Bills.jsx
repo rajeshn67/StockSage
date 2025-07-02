@@ -24,14 +24,15 @@ const Bills = () => {
       limit: 10,
     }
 
-    if (statusFilter) params.status = statusFilter
+    if (searchTerm) params.search = searchTerm;
+    if (statusFilter) params.status = statusFilter;
     if (dateRange.start && dateRange.end) {
-      params.startDate = dateRange.start
-      params.endDate = dateRange.end
+      params.startDate = dateRange.start;
+      params.endDate = dateRange.end;
     }
 
-    dispatch(fetchBills(params))
-  }, [dispatch, currentPage, statusFilter, dateRange])
+    dispatch(fetchBills(params));
+  }, [dispatch, currentPage, statusFilter, dateRange, searchTerm])
 
   const handleStatusUpdate = async (billId, newStatus) => {
     try {
