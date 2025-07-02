@@ -16,6 +16,14 @@ const Products = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const [showFilters, setShowFilters] = useState(false)
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("")
+  // New filter states
+  const [stockStatus, setStockStatus] = useState("");
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  // Local filter state for Apply Filters
+  const [pendingStockStatus, setPendingStockStatus] = useState("");
+  const [pendingMinPrice, setPendingMinPrice] = useState("");
+  const [pendingMaxPrice, setPendingMaxPrice] = useState("");
 
   const dispatch = useDispatch()
   const { products, categories, totalPages, total, loading, error } = useSelector((state) => state.products)
@@ -37,9 +45,20 @@ const Products = () => {
         category: selectedCategory,
         page: currentPage,
         limit: 10,
+        stockStatus,
+        minPrice: minPrice !== "" ? Number(minPrice) : undefined,
+        maxPrice: maxPrice !== "" ? Number(maxPrice) : undefined,
       }),
     )
-  }, [dispatch, debouncedSearchTerm, selectedCategory, currentPage])
+  }, [dispatch, debouncedSearchTerm, selectedCategory, currentPage, stockStatus, minPrice, maxPrice])
+
+  // Only update stockStatus/minPrice/maxPrice when Apply Filters is clicked
+  const handleApplyFilters = () => {
+    setStockStatus(pendingStockStatus);
+    setMinPrice(pendingMinPrice);
+    setMaxPrice(pendingMaxPrice);
+    setCurrentPage(1);
+  }
 
   // Fetch categories once on component mount
   useEffect(() => {
@@ -158,7 +177,7 @@ const Products = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Stock Status</label>
-                <select className="input">
+                <select className="input" value={pendingStockStatus} onChange={e => setPendingStockStatus(e.target.value)}>
                   <option value="">All Status</option>
                   <option value="in-stock">In Stock</option>
                   <option value="low-stock">Low Stock</option>
@@ -168,12 +187,12 @@ const Products = () => {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Price Range</label>
                 <div className="flex gap-2">
-                  <input type="number" placeholder="Min" className="input" />
-                  <input type="number" placeholder="Max" className="input" />
+                  <input type="number" placeholder="Min" className="input" value={pendingMinPrice} onChange={e => setPendingMinPrice(e.target.value)} />
+                  <input type="number" placeholder="Max" className="input" value={pendingMaxPrice} onChange={e => setPendingMaxPrice(e.target.value)} />
                 </div>
               </div>
               <div className="flex items-end">
-                <button className="btn btn-secondary w-full">Apply Filters</button>
+                <button className="btn btn-secondary w-full" onClick={handleApplyFilters} type="button">Apply Filters</button>
               </div>
             </div>
           </div>

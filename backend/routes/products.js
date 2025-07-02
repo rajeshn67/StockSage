@@ -8,9 +8,9 @@ const router = express.Router()
 // Get all products for authenticated user
 router.get("/", auth, async (req, res) => {
   try {
-    const { page = 1, limit = 10, search = "", category = "" } = req.query
+    const { page = 1, limit = 10, search = "", category = "", stockStatus = "", minPrice = "", maxPrice = "" } = req.query;
 
-    const query = { userId: req.user._id, isActive: true }
+    const query = { userId: req.user._id, isActive: true };
 
     if (search) {
       query.$or = [
@@ -18,31 +18,59 @@ router.get("/", auth, async (req, res) => {
         { description: { $regex: search, $options: "i" } },
         { category: { $regex: search, $options: "i" } },
         { barcode: { $regex: search, $options: "i" } },
-      ]
+      ];
     }
 
     if (category) {
-      query.category = { $regex: category, $options: "i" }
+      query.category = { $regex: category, $options: "i" };
     }
 
-    const products = await Product.find(query)
+    // Stock Status filter
+    if (stockStatus === "in-stock") {
+      query.quantity = { $gt: 0 };
+    } else if (stockStatus === "low-stock") {
+      // Will filter after query since $expr is not supported in .find()
+      // We'll do this in-memory for now
+    } else if (stockStatus === "out-of-stock") {
+      query.quantity = 0;
+    }
+
+    // Price range filter
+    if (minPrice !== "") {
+      query.price = { ...query.price, $gte: Number(minPrice) };
+    }
+    if (maxPrice !== "") {
+      query.price = { ...query.price, $lte: Number(maxPrice) };
+    }
+
+    let products = await Product.find(query)
       .limit(limit * 1)
       .skip((page - 1) * limit)
-      .sort({ createdAt: -1 })
+      .sort({ createdAt: -1 });
 
-    const total = await Product.countDocuments(query)
+    // Low stock filter (in-memory, if needed)
+    if (stockStatus === "low-stock") {
+      products = products.filter(p => p.quantity <= (p.minStockLevel || 10) && p.quantity > 0);
+    }
+
+    // Get total count for pagination
+    let total = await Product.countDocuments(query);
+    if (stockStatus === "low-stock") {
+      const allProducts = await Product.find(query);
+      total = allProducts.filter(p => p.quantity <= (p.minStockLevel || 10) && p.quantity > 0).length;
+    }
 
     res.json({
       products,
       totalPages: Math.ceil(total / limit),
       currentPage: Number.parseInt(page),
       total,
-    })
+    });
   } catch (error) {
-    console.error("Get products error:", error)
-    res.status(500).json({ message: "Server error" })
+    console.error("Get products error:", error);
+    res.status(500).json({ message: "Server error" });
   }
-})
+});
 
 // Get single product
 router.get("/:id", auth, async (req, res) => {
